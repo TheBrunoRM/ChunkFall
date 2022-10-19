@@ -1,0 +1,15 @@
+main: ${mainClass}
+version: ${project.version}
+name: ${project.name}
+author: BrunoRM
+softdepend:
+  - Vault
+  - WorldEdit
+  - PlaceholderAPI
+  - HolographicDisplays
+  - DecentHolograms
+api-version: 1.13
+
+commands:
+  chunkfall:
+    description: Main command.
