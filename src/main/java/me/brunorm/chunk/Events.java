@@ -69,7 +69,6 @@ public class Events implements Listener {
 			this.chunks.put(player, chunk);
 			this.tasks.put(player, Bukkit.getScheduler().runTaskTimer(ChunkFall.get(), new Runnable() {
 
-				@SuppressWarnings("deprecation")
 				@Override
 				public void run() {
 					final Chunk chunk = player.getLocation().getChunk();
