@@ -28,21 +28,21 @@ public class BukkitReflection {
 	Class<?> chatMessageTypeClass = this.getChatMessageTypeClass();
 
 	void debug(String text) {
-		Bukkit.getLogger().info(Messager.color(text));
+		Bukkit.getConsoleSender().sendMessage(Messager.color(text));
 	}
 
 	// getters
 
 	public Class<?> getChatSerializer() {
 		try {
-			this.debug(this.prefix + "&6Loading &cold &bChatSerializer");
+			this.debug(this.prefix + " &6Loading &cold &bChatSerializer");
 			return this.getNMS("ChatSerializer");
 		} catch (final Exception e) {
 			try {
-				this.debug(this.prefix + "&6Loading &anew &bChatSerializer");
+				this.debug(this.prefix + " &6Loading &anew &bChatSerializer");
 				return this.getNMS("IChatBaseComponent$ChatSerializer");
 			} catch (final Exception e2) {
-				this.debug(this.prefix + "&cCould not load &bChatSerializer");
+				this.debug(this.prefix + " &cCould not load &bChatSerializer");
 				return null;
 			}
 		}
@@ -50,31 +50,31 @@ public class BukkitReflection {
 
 	public Class<?> getIChatBaseComponent() {
 		try {
-			this.debug(this.prefix + "&6Loading &bChatBaseComponent Interface");
+			this.debug(this.prefix + " &6Loading &bChatBaseComponent Interface");
 			return this.getNMS("IChatBaseComponent");
 		} catch (final Exception e) {
 			Bukkit.getServer().getConsoleSender()
-					.sendMessage(this.prefix + "&cCould not load &bChatBaseComponent Interface");
+					.sendMessage(this.prefix + " &cCould not load &bChatBaseComponent Interface");
 			return null;
 		}
 	}
 
 	public Class<?> getPacketPlayOutTitle() {
 		try {
-			this.debug(this.prefix + "&6Loading &bPacketPlayOutTitle");
+			this.debug(this.prefix + " &6Loading &bPacketPlayOutTitle");
 			return this.getNMS("PacketPlayOutTitle");
 		} catch (final Exception e) {
-			this.debug(this.prefix + "&cCould not load &bPacketPlayOutTitle");
+			this.debug(this.prefix + " &cCould not load &bPacketPlayOutTitle");
 			return null;
 		}
 	}
 
 	public Class<?> getPacketPlayOutChat() {
 		try {
-			this.debug(this.prefix + "&6Loading &bPacketPlayOutChat");
+			this.debug(this.prefix + " &6Loading &bPacketPlayOutChat");
 			return this.getNMS("PacketPlayOutChat");
 		} catch (final Exception e) {
-			this.debug(this.prefix + "&cCould not load &bPacketPlayOutChat");
+			this.debug(this.prefix + " &cCould not load &bPacketPlayOutChat");
 			return null;
 		}
 	}
