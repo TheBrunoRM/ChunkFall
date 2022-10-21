@@ -3,9 +3,10 @@ package me.brunorm.chunk;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.GameMode;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,18 +15,8 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class Events implements Listener {
 
-	HashMap<Player, Chunk> chunks = new HashMap<Player, Chunk>();
-	HashMap<Player, Integer> seconds = new HashMap<Player, Integer>();
-	HashMap<Player, BukkitTask> tasks = new HashMap<Player, BukkitTask>();
-
-	void cancel(Player p) {
-		// Events.this.chunks.remove(p);
-		Events.this.seconds.remove(p);
-		final BukkitTask task = Events.this.tasks.get(p);
-		if (task != null)
-			task.cancel();
-		Events.this.tasks.remove(p);
-	}
+	HashMap<Chunk, BukkitTask> tasks = new HashMap<Chunk, BukkitTask>();
+	HashMap<Chunk, Integer> chunk_seconds = new HashMap<Chunk, Integer>();
 
 	@SuppressWarnings("deprecation")
 	private void fallChunk(Chunk chunk) {
@@ -48,52 +39,54 @@ public class Events implements Listener {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	void title(Player player, String title, String subtitle) {
-		player.sendTitle(ChatColor.translateAlternateColorCodes('&', title),
-				ChatColor.translateAlternateColorCodes('&', subtitle));
+	void cancel(Chunk c) {
+		Events.this.tasks.get(c).cancel();
+		Events.this.tasks.remove(c);
 	}
 
 	@EventHandler
 	void onMove(PlayerMoveEvent e) {
+		if (!ChunkFall.enabled)
+			return;
 		final Player player = e.getPlayer();
 
-		/*
-		 * final BukkitTask curTask = this.tasks.get(player); if (curTask != null)
-		 * return;
-		 */
+		if (player.getGameMode() != GameMode.SURVIVAL //
+				&& player.getGameMode() != GameMode.ADVENTURE)
+			return;
 
 		final Chunk chunk = player.getLocation().getChunk();
-		if (chunk != this.chunks.get(player)) {
-			this.cancel(player);
-			this.chunks.put(player, chunk);
-			this.tasks.put(player, Bukkit.getScheduler().runTaskTimer(ChunkFall.get(), new Runnable() {
+		if (this.tasks.get(chunk) != null)
+			return;
 
-				@Override
-				public void run() {
-					final Chunk chunk = player.getLocation().getChunk();
-					if (chunk != Events.this.chunks.get(player))
-						Events.this.cancel(player);
+		this.tasks.put(chunk, Bukkit.getScheduler().runTaskTimer(ChunkFall.get(), new Runnable() {
 
-					int cur;
-					if (Events.this.seconds.get(player) == null)
-						cur = ChunkFall.get().getConfig().getInt("seconds_until_fall");
-					else
-						cur = Events.this.seconds.get(player);
+			int seconds = ChunkFall.get().getConfig().getInt("seconds_until_fall");
 
-					if (cur > 0)
-						Events.this.title(player, "&c&l" + cur, ChunkFall.get().getConfig().getString("subtitle"));
-					else {
-						Events.this.title(player, ChunkFall.get().getConfig().getString("title"),
+			@Override
+			public void run() {
+
+				for (final Entity en : chunk.getEntities()) {
+					if (!(en instanceof Player))
+						continue;
+					final Player p = (Player) en;
+
+					if (this.seconds > 0)
+						ChunkFall.get().NMS().sendTitle(p, "&c&l" + this.seconds,
 								ChunkFall.get().getConfig().getString("subtitle"));
-						Events.this.fallChunk(chunk);
-						Events.this.cancel(player);
-						return;
+					else {
+						ChunkFall.get().NMS().sendTitle(p, ChunkFall.get().getConfig().getString("title"),
+								ChunkFall.get().getConfig().getString("subtitle"));
 					}
-					final int sec = cur - 1;
-					Events.this.seconds.put(player, sec);
 				}
-			}, 0, 20L));
-		}
+
+				if (this.seconds <= 0) {
+					Events.this.fallChunk(chunk);
+					Events.this.cancel(chunk);
+					return;
+				}
+
+				this.seconds -= 1;
+			}
+		}, 0, 20L));
 	}
 }
